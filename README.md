@@ -16,4 +16,7 @@ The way we get the ARIMA model here is almost identical, and we fit this model o
 We now use the manual_forecast() function to create and LSTM model with specifications enough to make it reasonably powerful. The function automatically fits our data to this model.
 We now compare the predictions given by both models on the same dataset, and analyse the errors and residual plots for the predicted data.
 
-## That was it for the first half of the WiDS Term!
+## Week 3 
+The final piece of the puzzle involved using the TextBlob module in Python to analyze news articles related to stock prices and incorporate this information into the model training process. TextBlob provides a simple and intuitive interface for performing natural language processing tasks, making it well suited for sentiment analysis of textual data. As a first step, basic implementation of TextBlob was carried out to determine the polarity of each statement, which indicates whether the sentiment expressed in the text is positive, negative, or neutral. This polarity score helped quantify the general market sentiment conveyed by news articles.
+
+## That was it for the WiDS Bootcamp!
