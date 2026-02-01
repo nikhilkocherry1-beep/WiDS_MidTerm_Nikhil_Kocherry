@@ -1,0 +1,71 @@
+import pandas as pd
+import numpy as np
+from textblob import TextBlob
+import yfinance as yf
+import kagglehub
+from datetime import datetime
+import itertools
+df = pd.read_csv("/Users/nikhilkocherry/Documents/Assignment_3_DS/apple_news_data.csv")
+df = df.drop(columns = ['title','link','symbols','tags','sentiment_polarity','sentiment_neg','sentiment_neu','sentiment_pos'])
+fs = '%Y-%m-%d'
+df['date'] = df['date'].apply(lambda x: datetime.strptime(x[:10],fs).date())
+aapl = yf.Ticker("AAPL")
+dat = aapl.history(period = "36mo")
+dat = dat.drop(columns = ['Open', 'High', 'Low', 'Volume', 'Dividends', 'Stock Splits'])
+dat = dat.dropna()
+dat["date"] = dat.index
+dat["date"] = dat["date"].dt.date
+dat.index = range(0,len(dat))
+a = range(0,len(df))
+b = range(0,len(dat))
+fdat = pd.DataFrame({'date':[],'price':[],'sentiment':[]})
+for k in itertools.product(a,b):
+    i = k[0]
+    j = k[1]
+    d = {}
+    try:
+        if(df.at[i,'date'] == dat.at[j,'date']):
+            d['date'] = df.at[i,'date']
+            d['price'] = dat.at[j,'Close']
+            d['sentiment'] = TextBlob(df.content).sentiment.polarity
+            df = pd.concat([df,d],ignore_index = True)
+    except:
+        continue
+f1 = Forcaster(y = fdat.price ,current_dates = fdat.date)           
+f2 = Forcaster(y = [fdat.price,fdat.sentiment],current_dates = fdat.date)
+f2.manual_forecast(
+    call_me='lstm_init',
+    lags=36,
+    batch_size=32,
+    epochs=15,
+    validation_split = 0.2
+    shuffle = False
+    activation='tanh',
+    optimizer='Adam',
+    learning_rate=0.001,
+    lstm_layer_sizes=(72,)*4,
+    dropout=(0,)*4,
+    plot_loss=False
+)
+f1.fit()
+f1.predict()
+f1.plot(models = 'lstm_init')
+f2.manual_forecast(
+    call_me='lstm_final',
+    lags=36,
+    batch_size=32,
+    epochs=15,
+    validation_split = 0.2
+    shuffle = False
+    activation='tanh',
+    optimizer='Adam',
+    learning_rate=0.001,
+    lstm_layer_sizes=(72,)*4,
+    dropout=(0,)*4,
+    plot_loss=False
+)
+f2.fit()
+f2.predict()
+f2.plot(models = 'lstm_final')
+
+
